@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机甲战神 - 机甲定制与竞技</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 主菜单 -->
+    <div id="mainMenu" class="menu-screen active">
+        <div class="menu-container">
+            <h1 class="game-title">机甲战神</h1>
+            <p class="game-subtitle">定制你的专属机甲，成为最强战士</p>
+            <div class="menu-buttons">
+                <button id="startGameBtn" class="menu-btn primary-btn">开始游戏</button>
+                <button id="customizeBtn" class="menu-btn secondary-btn">机甲定制</button>
+                <button id="helpBtn" class="menu-btn tertiary-btn">游戏说明</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 机甲定制界面 -->
+    <div id="customizeScreen" class="menu-screen">
+        <div class="customize-container">
+            <div class="customize-header">
+                <h2>机甲定制</h2>
+                <button id="backToMenuBtn" class="back-btn">返回主菜单</button>
+            </div>
+            <div class="customize-content">
+                <!-- 3D预览区 -->
+                <div class="preview-area">
+                    <canvas id="customizeCanvas"></canvas>
+                    <div class="preview-controls">
+                        <button id="rotateLeft" class="control-btn">◀</button>
+                        <button id="rotateRight" class="control-btn">▶</button>
+                        <button id="resetView" class="control-btn">重置视角</button>
+                    </div>
+                </div>
+                
+                <!-- 自定义面板 -->
+                <div class="customize-panel">
+                    <!-- 机甲蓝图选择 -->
+                    <div class="panel-section">
+                        <h3>机甲蓝图</h3>
+                        <div class="blueprint-grid" id="blueprintGrid">
+                            <!-- 动态生成蓝图选项 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 武器选择 -->
+                    <div class="panel-section">
+                        <h3>武器装备</h3>
+                        <div class="weapon-select" id="weaponSelect">
+                            <div class="weapon-slot">
+                                <label>主武器:</label>
+                                <select id="primaryWeapon" class="weapon-dropdown">
+                                    <option value="plasma_cannon">等离子炮</option>
+                                    <option value="laser_rifle">激光步枪</option>
+                                    <option value="missile_launcher">导弹发射器</option>
+                                </select>
+                            </div>
+                            <div class="weapon-slot">
+                                <label>副武器:</label>
+                                <select id="secondaryWeapon" class="weapon-dropdown">
+                                    <option value="none">无</option>
+                                    <option value="plasma_pistol">等离子手枪</option>
+                                    <option value="shotgun">霰弹枪</option>
+                                    <option value="gatling">加特林机枪</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 属性调整 -->
+                    <div class="panel-section">
+                        <h3>属性调配</h3>
+                        <div class="stats-container">
+                            <div class="stat-row">
+                                <label>攻击力</label>
+                                <input type="range" id="attackStat" min="0" max="100" value="50" class="stat-slider">
+                                <span id="attackValue" class="stat-value">50</span>
+                            </div>
+                            <div class="stat-row">
+                                <label>防御力</label>
+                                <input type="range" id="defenseStat" min="0" max="100" value="50" class="stat-slider">
+                                <span id="defenseValue" class="stat-value">50</span>
+                            </div>
+                            <div class="stat-row">
+                                <label>速度</label>
+                                <input type="range" id="speedStat" min="0" max="100" value="50" class="stat-slider">
+                                <span id="speedValue" class="stat-value">50</span>
+                            </div>
+                            <div class="stat-row">
+                                <label>能量</label>
+                                <input type="range" id="energyStat" min="0" max="100" value="50" class="stat-slider">
+                                <span id="energyValue" class="stat-value">50</span>
+                            </div>
+                        </div>
+                        <p class="stat-note">总属性点: <span id="totalPoints">200</span>/400</p>
+                    </div>
+                    
+                    <!-- 保存按钮 -->
+                    <button id="saveCustomization" class="save-btn">保存配置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模式选择界面 -->
+    <div id="modeSelectScreen" class="menu-screen">
+        <div class="mode-container">
+            <div class="mode-header">
+                <h2>选择对战模式</h2>
+                <button id="backFromModeBtn" class="back-btn">返回</button>
+            </div>
+            <div class="mode-grid">
+                <div class="mode-card" id="soloMode">
+                    <h3>单人混战</h3>
+                    <p>与AI对手进行1v1对战，测试你的机甲性能</p>
+                    <button class="select-mode-btn">选择模式</button>
+                </div>
+                <div class="mode-card" id="arenaMode">
+                    <h3>竞技场</h3>
+                    <p>在开放竞技场中与多个AI敌人战斗</p>
+                    <button class="select-mode-btn">选择模式</button>
+                </div>
+                <div class="mode-card" id="trainingMode">
+                    <h3>训练模式</h3>
+                    <p>在无压力环境中练习操作和技能</p>
+                    <button class="select-mode-btn">选择模式</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 游戏界面 -->
+    <div id="gameScreen" class="menu-screen">
+        <!-- 游戏画布 -->
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- 游戏UI覆盖层 -->
+        <div id="gameUI" class="game-ui">
+            <!-- 玩家状态 -->
+            <div class="player-status">
+                <div class="health-bar-container">
+                    <div class="bar-label">生命值</div>
+                    <div class="bar-bg">
+                        <div id="playerHealthBar" class="bar-fill health-bar" style="width: 100%"></div>
+                    </div>
+                    <div class="bar-text"><span id="playerHealth">100</span>/100</div>
+                </div>
+                <div class="energy-bar-container">
+                    <div class="bar-label">能量</div>
+                    <div class="bar-bg">
+                        <div id="playerEnergyBar" class="bar-fill energy-bar" style="width: 100%"></div>
+                    </div>
+                    <div class="bar-text"><span id="playerEnergy">100</span>/100</div>
+                </div>
+                <div class="combo-container">
+                    <div class="combo-label">连击</div>
+                    <div id="comboCount" class="combo-count">0</div>
+                </div>
+            </div>
+            
+            <!-- 技能栏 -->
+            <div class="skill-bar">
+                <div class="skill-item" id="skill1">
+                    <div class="skill-icon">⚔</div>
+                    <div class="skill-cooldown" style="height: 0%"></div>
+                    <div class="skill-key">Q</div>
+                    <div class="skill-name">攻击</div>
+                </div>
+                <div class="skill-item" id="skill2">
+                    <div class="skill-icon">🛡</div>
+                    <div class="skill-cooldown" style="height: 0%"></div>
+                    <div class="skill-key">W</div>
+                    <div class="skill-name">防御</div>
+                </div>
+                <div class="skill-item" id="skill3">
+                    <div class="skill-icon">🔥</div>
+                    <div class="skill-cooldown" style="height: 0%"></div>
+                    <div class="skill-key">E</div>
+                    <div class="skill-name">爆气</div>
+                </div>
+                <div class="skill-item" id="skill4">
+                    <div class="skill-icon">💥</div>
+                    <div class="skill-cooldown" style="height: 0%"></div>
+                    <div class="skill-key">R</div>
+                    <div class="skill-name">大招</div>
+                </div>
+            </div>
+            
+            <!-- 敌人状态 -->
+            <div class="enemy-status">
+                <div class="enemy-card">
+                    <div class="enemy-name">敌方机甲</div>
+                    <div class="health-bar-container mini">
+                        <div class="bar-bg">
+                            <div id="enemyHealthBar" class="bar-fill health-bar" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 暂停按钮 -->
+            <button id="pauseBtn" class="pause-btn">⏸ 暂停</button>
+        </div>
+        
+        <!-- 暂停菜单 -->
+        <div id="pauseMenu" class="pause-menu hidden">
+            <div class="pause-container">
+                <h2>游戏暂停</h2>
+                <div class="pause-buttons">
+                    <button id="resumeBtn" class="menu-btn primary-btn">继续游戏</button>
+                    <button id="restartBtn" class="menu-btn secondary-btn">重新开始</button>
+                    <button id="quitBtn" class="menu-btn tertiary-btn">退出游戏</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 游戏结束界面 -->
+        <div id="gameOverScreen" class="game-over hidden">
+            <div class="game-over-container">
+                <h2 id="gameOverTitle">战斗结束</h2>
+                <p id="gameOverMessage">你的表现很出色！</p>
+                <div class="game-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">击败敌人:</span>
+                        <span id="finalKills" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">最高连击:</span>
+                        <span id="finalCombo" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">造成伤害:</span>
+                        <span id="finalDamage" class="stat-value">0</span>
+                    </div>
+                </div>
+                <div class="game-over-buttons">
+                    <button id="playAgainBtn" class="menu-btn primary-btn">再来一局</button>
+                    <button id="backToMenuFromGame" class="menu-btn secondary-btn">返回主菜单</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 帮助界面 -->
+    <div id="helpScreen" class="menu-screen">
+        <div class="help-container">
+            <div class="help-header">
+                <h2>游戏说明</h2>
+                <button id="backFromHelpBtn" class="back-btn">返回主菜单</button>
+            </div>
+            <div class="help-content">
+                <div class="help-section">
+                    <h3>基本操作</h3>
+                    <div class="control-list">
+                        <div class="control-item">
+                            <span class="key">W/A/S/D</span>
+                            <span class="desc">移动机甲</span>
+                        </div>
+                        <div class="control-item">
+                            <span class="key">鼠标</span>
+                            <span class="desc">控制视角</span>
+                        </div>
+                        <div class="control-item">
+                            <span class="key">鼠标左键</span>
+                            <span class="desc">普通攻击</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="help-section">
+                    <h3>技能系统</h3>
+                    <div class="skill-list">
+                        <div class="skill-desc">
+                            <div class="skill-icon">⚔</div>
+                            <div class="skill-info">
+                                <h4>攻击强化 (Q)</h4>
+                                <p>短时间内提升攻击力，造成额外伤害</p>
+                            </div>
+                        </div>
+                        <div class="skill-desc">
+                            <div class="skill-icon">🛡</div>
+                            <div class="skill-info">
+                                <h4>防御护盾 (W)</h4>
+                                <p>生成护盾抵挡伤害，持续一定时间</p>
+                            </div>
+                        </div>
+                        <div class="skill-desc">
+                            <div class="skill-icon">🔥</div>
+                            <div class="skill-info">
+                                <h4>爆气状态 (E)</h4>
+                                <p>进入爆气状态，大幅提升所有属性</p>
+                            </div>
+                        </div>
+                        <div class="skill-desc">
+                            <div class="skill-icon">💥</div>
+                            <div class="skill-info">
+                                <h4>终极必杀 (R)</h4>
+                                <p>释放强大的终极技能，造成毁灭性伤害</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="help-section">
+                    <h3>游戏模式</h3>
+                    <div class="mode-desc">
+                        <h4>单人混战</h4>
+                        <p>与AI对手进行1v1对战，测试你的机甲性能和战斗技巧</p>
+                        
+                        <h4>竞技场</h4>
+                        <p>在开放竞技场中与多个AI敌人战斗，生存到最后</p>
+                        
+                        <h4>训练模式</h4>
+                        <p>在无压力环境中练习操作和技能，熟悉机甲特性</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 脚本引入 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/mech-blueprints.js"></script>
+    <script src="js/weapons.js"></script>
+    <script src="js/3d-renderer.js"></script>
+    <script src="js/customize-manager.js"></script>
+    <script src="js/game-state.js"></script>
+    <script src="js/skill-system.js"></script>
+    <script src="js/enemy-ai.js"></script>
+    <script src="js/game-engine.js"></script>
+    <script src="js/ui-manager.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
